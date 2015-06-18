@@ -8,13 +8,7 @@ fio-buffer
 .. image:: https://coveralls.io/repos/geowurster/fio-buffer/badge.svg?branch=master
     :target: https://coveralls.io/r/geowurster/fio-buffer?branch=master
 
-A `Fiona <http://toblerity.org/fiona/manual.html>`_  CLI plugin for buffering geometries.  Powered by `buffer <http://toblerity.org/shapely/manual.html#object.buffer>`_.
-
-Buffering geometries is an embarrassingly parallel task that benefits greatly from
-parallelization.  Large complex geometries with a large number of vertexes take much longer
-to process than simple small ones.  Use the ``--jobs`` flag to spread processing across a
-number of cores but remember that the output feature order is not guaranteed to be the same
-as the input feature order.
+A `Fiona <http://toblerity.org/fiona/manual.html>`_  CLI plugin for buffering geometries in parallel.  Powered by `Shapely <http://toblerity.org/shapely/manual.html#object.buffer>`_.
 
 
 Usage
