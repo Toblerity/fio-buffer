@@ -15,10 +15,6 @@ with open('README.rst') as f:
     readme = f.read().strip()
 
 
-with open('LICENSE.txt') as f:
-    license = f.read().strip()
-
-
 version = None
 author = None
 email = None
@@ -62,7 +58,7 @@ setup(
     include_package_data=True,
     install_requires=['click>=0.3', 'shapely', 'fiona>=0.6'],
     keywords='Fiona fio GIS vector buffer plugin',
-    license=license,
+    license="New BSD",
     long_description=readme,
     name='fio-buffer',
     packages=find_packages(),
