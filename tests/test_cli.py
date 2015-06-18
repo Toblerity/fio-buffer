@@ -27,8 +27,8 @@ def test_standard(tmpdir):
                 if buf['geometry']['type'] == 'Polygon':
                     e_x, e_y = e_pair
                     a_x, a_y = a_pair
-                    assert round(e_x, 7) == round(a_x, 7)
-                    assert round(e_y, 7) == round(a_y, 7)
+                    assert round(e_x, 3) == round(a_x, 3)
+                    assert round(e_y, 3) == round(a_y, 3)
 
 
 def test_distance_field(tmpdir):
@@ -50,8 +50,8 @@ def test_distance_field(tmpdir):
                 if buf['geometry']['type'] == 'Polygon':
                     e_x, e_y = e_pair
                     a_x, a_y = a_pair
-                    assert round(e_x, 7) == round(a_x, 7)
-                    assert round(e_y, 7) == round(a_y, 7)
+                    assert round(e_x, 3) == round(a_x, 3)
+                    assert round(e_y, 3) == round(a_y, 3)
 
 
 def test_buf_crs(tmpdir):
@@ -78,8 +78,8 @@ def test_buf_crs(tmpdir):
                 if buf['geometry']['type'] == 'Polygon':
                     e_x, e_y = e_pair
                     a_x, a_y = a_pair
-                    assert round(e_x, 7) == round(a_x, 7)
-                    assert round(e_y, 7) == round(a_y, 7)
+                    assert round(e_x, 3) == round(a_x, 3)
+                    assert round(e_y, 3) == round(a_y, 3)
 
 
 def test_buf_dst_crs(tmpdir):
@@ -107,5 +107,5 @@ def test_buf_dst_crs(tmpdir):
                 if buf['geometry']['type'] == 'Polygon':
                     e_x, e_y = e_pair
                     a_x, a_y = a_pair
-                    assert round(e_x, 7) == round(a_x, 7)
-                    assert round(e_y, 7) == round(a_y, 7)
+                    assert round(e_x, 3) == round(a_x, 3)
+                    assert round(e_y, 3) == round(a_y, 3)
