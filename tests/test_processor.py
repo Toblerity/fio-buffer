@@ -1,4 +1,5 @@
-from fiona.transform import transform_geom
+import copy
+
 from shapely.geometry import mapping
 from shapely.geometry import shape
 
@@ -28,11 +29,61 @@ def test_just_buffer():
         'skip_failures': False,
         'buf_args': {'distance': 10},
     }
+
     expected = {
         'type': 'Feature',
         'properties': feature['properties'],
         'geometry': mapping(shape(feature['geometry']).buffer(**args['buf_args']))
     }
+
+    actual = fio_buffer.core._processor(args)
+
+    assert expected.keys() == actual.keys()
+    assert expected['properties'] == actual['properties']
+
+    for a_pair, e_pair in zip(
+            expected['geometry']['coordinates'][0], actual['geometry']['coordinates'][0]):
+        assert list(map(round7, a_pair)) == list(map(round7, e_pair))
+
+
+def test_buffer_field():
+    args = {
+        'feat': feature,
+        'src_crs': None,
+        'buf_crs': None,
+        'dst_crs': None,
+        'skip_failures': False,
+        'buf_args': {'distance': 'prop1'},
+    }
+
+    expected = {
+        'type': 'Feature',
+        'properties': feature['properties'],
+        'geometry': mapping(shape(feature['geometry']).buffer(distance=1))
+    }
+
+    actual = fio_buffer.core._processor(args)
+
+    assert expected.keys() == actual.keys()
+    assert expected['properties'] == actual['properties']
+
+    for a_pair, e_pair in zip(
+            expected['geometry']['coordinates'][0], actual['geometry']['coordinates'][0]):
+        assert list(map(round7, a_pair)) == list(map(round7, e_pair))
+
+
+def test_buffer_field_no_val():
+    # Buffer by a field where the distance is None
+    args = {
+        'feat': feature,
+        'src_crs': None,
+        'buf_crs': None,
+        'dst_crs': None,
+        'skip_failures': False,
+        'buf_args': {'distance': 'prop2'},
+    }
+
+    expected = copy.deepcopy(feature)
     actual = fio_buffer.core._processor(args)
 
     assert expected.keys() == actual.keys()

@@ -57,7 +57,7 @@ def _cb_res(ctx, param, value):
 def _cb_dist(ctx, param, value):
 
     """
-    Click callback to ensure `--dist` can be either a float or a field name.
+    Click callback to ensure `--distance` can be either a float or a field name.
     """
 
     try:
@@ -69,7 +69,7 @@ def _cb_dist(ctx, param, value):
 def _processor(args):
 
     """
-    Process a single feature
+    Process a single feature.
 
     Parameters
     ----------
@@ -102,7 +102,13 @@ def _processor(args):
 
     # Support buffering by a field's value
     if not isinstance(buf_args['distance'], (float, int)):
-        buf_args['distance'] = feat['properties'][buf_args['distance']]
+        field_val = feat['properties'][buf_args['distance']]
+
+        # Buffering according to a field but field is None so just return the feature
+        if field_val is None:
+            return feat
+        else:
+            buf_args['distance'] = field_val
 
     try:
         # src_crs -> buf_crs
@@ -123,7 +129,7 @@ def _processor(args):
         return feat
 
     except Exception:
-        logger.exception("Feature with ID %s failed", feat.get('id'))
+        logger.exception("Feature with ID %s failed during buffering", feat.get('id'))
         if not skip_failures:
             raise
 
@@ -133,56 +139,61 @@ def _processor(args):
 @click.argument('infile', required=True)
 @click.argument('outfile', required=True)
 @click.option(
-    '-f', '--format', '--driver', metavar='NAME', required=True,
-    help="Output driver name."
+    '-f', '--format', '--driver', metavar='NAME',
+    help="Output driver name.  Derived from the input datasource if not given."
 )
 @click.option(
-    '--cap-style', type=click.Choice(['flat', 'round', 'square']), default='round',
-    callback=_cb_cap_style, help="Where geometries terminate, use this style. (default: round)"
+    '--cap-style', type=click.Choice(['flat', 'round', 'square']),
+    default='round', show_default=True,
+    callback=_cb_cap_style, help="Where geometries terminate, use this style."
 )
 @click.option(
-    '--join-style', type=click.Choice(['round', 'mitre', 'bevel']), default='round',
-    callback=_cb_join_style, help="Where geometries touch, use this style. (default: round)"
+    '--join-style', type=click.Choice(['round', 'mitre', 'bevel']),
+    default='round', show_default=True,
+    callback=_cb_join_style, help="Where geometries touch, use this style."
 )
 @click.option(
-    '--res', type=click.INT, callback=_cb_res, default=16,
-    help="Resolution of the buffer around each vertex of the object. (default: 16)"
+    '--res', type=click.INT, callback=_cb_res, default=16, show_default=True,
+    help="Resolution of the buffer around each vertex of the geometry."
 )
 @click.option(
-    '--mitre-limit', type=click.FLOAT, default=5.0,
+    '--mitre-limit', type=click.FLOAT, default=5.0, show_default=True,
     help="When using a mitre join, limit the maximum length of the join corner according to "
-         "this ratio. (default: 0.5)"
+         "this ratio."
 )
 @click.option(
-    '--dist', metavar='FLOAT | FIELD', required=True, callback=_cb_dist,
-    help="Buffer distance in georeferenced units according to --buf-dist."
+    '--distance', metavar='FLOAT|FIELD', required=True, callback=_cb_dist,
+    help="Buffer distance or field containing distance values.  Units match --buf-crs.  "
+         "When buffering with a field, feature's with a null value are unaltered."
 )
 @click.option(
     '--src-crs', help="Specify CRS for input data.  Not needed if set in input file."
 )
 @click.option(
-    '--buf-crs', help="Perform buffer operations in a different CRS. (default: --src-crs)"
+    '--buf-crs', help="Perform buffer operations in a different CRS. [default: --src-crs]"
 )
 @click.option(
     '--dst-crs', help="Reproject geometries to a different CRS before writing.  Must be "
-                      "combined with --buf-crs. (default: --src-crs)"
+                      "combined with --buf-crs. [default: --src-crs]"
 )
 @click.option(
-    '--otype', 'output_geom_type', default='MultiPolygon', metavar='GEOMTYPE',
-    help="Specify output geometry type. (default: MultiPolygon)"
+    '--geom-type', 'output_geom_type', default='MultiPolygon',
+    metavar='GEOMTYPE', show_default=True,
+    help="Output layer's geometry type."
 )
 @click.option(
     '--skip-failures', is_flag=True,
     help="Skip geometries that fail somewhere in the processing pipeline."
 )
 @click.option(
-    '--jobs', type=click.IntRange(1, cpu_count()), default=1, metavar="CORES",
-    help="Process geometries in parallel across N cores.  The goal of this flag is speed so "
-         "feature order and ID's are not preserved. (default: 1)"
+    '--jobs', type=click.IntRange(1, cpu_count()), default=1,
+    metavar="CORES", show_default=True,
+    help="Process geometries in parallel across N cores.  Feature ID's and order are not "
+         "preserved if more that 1 cores are used."
 )
 @click.pass_context
 def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit,
-           dist, src_crs, buf_crs, dst_crs, output_geom_type, skip_failures, jobs):
+           distance, src_crs, buf_crs, dst_crs, output_geom_type, skip_failures, jobs):
 
     """
     Geometries can be dilated with a positive distance, eroded with a negative
@@ -195,9 +206,9 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
     Default settings - buffer geometries in the input CRS:
 
     \b
-        $ fio buffer in.geojson out.geojson --dist 10
+        $ fio buffer in.geojson out.geojson --distance 10
 
-    Dynamically buffer geometries by a distance stored in the field `magnitude`
+    Dynamically buffer geometries by a distance stored in the field 'magnitude'
     and write as GeoJSON:
 
     \b
@@ -205,13 +216,13 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
             in.shp \\
             out.geojson \\
             --driver GeoJSON \\
-            --dist magnitude
+            --distance magnitude
 
     Read geometries from one CRS, buffer in another, and then write to a third:
 
     \b
         $ fio buffer in.shp out.shp \\
-            --dist 10 \\
+            --distance 10 \\
             --buf-crs EPSG:3857 \\
             --dst-crs EPSG:32618
 
@@ -219,7 +230,7 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
 
     \b
         $ fio buffer in.geojson out.geojson \\
-            --dist 0.1 \\
+            --distance 0.1 \\
             --res 5 \\
             --cap-style flat \\
             --join-style mitre \\
@@ -235,7 +246,7 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
     if isinstance(getattr(ctx, 'obj'), dict):
         logger.setLevel(ctx.obj.get('verbosity', 1))
 
-    with fio.open(infile, 'r') as src:
+    with fio.open(infile) as src:
 
         logger.debug("Resolving CRS fall backs")
 
@@ -243,7 +254,7 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
         buf_crs = buf_crs or src_crs
         dst_crs = dst_crs or src_crs
 
-        if src_crs is None:
+        if not src_crs:
             raise click.ClickException(
                 "CRS is not set in input file.  Use --src-crs to specify.")
 
@@ -266,7 +277,7 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
 
             # Keyword arguments for `<Geometry>.buffer()`
             buf_args = {
-                'distance': dist,
+                'distance': distance,
                 'resolution': res,
                 'cap_style': cap_style,
                 'join_style': join_style,
@@ -287,6 +298,12 @@ def buffer(ctx, infile, outfile, driver, cap_style, join_style, res, mitre_limit
             logger.debug("Starting processing on %s cores", jobs)
             for o_feat in Pool(jobs).imap_unordered(_processor, task_generator):
                 if o_feat is not None:
-                    dst.write(o_feat)
+                    try:
+                        dst.write(o_feat)
+                    except Exception:
+                        logger.exception(
+                            "Feature with ID %s failed during write", o_feat.get('id'))
+                        if not skip_failures:
+                            raise
 
             logger.debug("Finished processing.")

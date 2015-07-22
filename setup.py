@@ -53,10 +53,14 @@ setup(
         buffer=fio_buffer.core:buffer
     """,
     extras_require={
-        'test': ['pytest', 'pytest-cov']
+        'dev': ['pytest', 'pytest-cov']
     },
     include_package_data=True,
-    install_requires=['click>=0.3', 'shapely', 'fiona>=0.6'],
+    install_requires=[
+        'click>=0.3',
+        'shapely',
+        'fiona>=1.6'
+    ],
     keywords='Fiona fio GIS vector buffer plugin',
     license="New BSD",
     long_description=readme,
