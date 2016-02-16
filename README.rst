@@ -2,11 +2,11 @@
 fio-buffer
 ==========
 
-.. image:: https://travis-ci.org/geowurster/fio-buffer.svg?branch=master
-    :target: https://travis-ci.org/geowurster/fio-buffer?branch=master
+.. image:: https://travis-ci.org/toblerity/fio-buffer.svg?branch=master
+    :target: https://travis-ci.org/toblerity/fio-buffer?branch=master
 
-.. image:: https://coveralls.io/repos/geowurster/fio-buffer/badge.svg?branch=master
-    :target: https://coveralls.io/r/geowurster/fio-buffer?branch=master
+.. image:: https://coveralls.io/repos/toblerity/fio-buffer/badge.svg?branch=master
+    :target: https://coveralls.io/r/toblerity/fio-buffer?branch=master
 
 A `Fiona <http://toblerity.org/fiona/manual.html>`_  CLI plugin for buffering geometries in parallel.  Powered by `Shapely <http://toblerity.org/shapely/manual.html#object.buffer>`_.
 
@@ -104,7 +104,7 @@ From source:
 
 .. code-block:: console
 
-    $ git clone https://github.com/geowurster/fio-buffer
+    $ git clone https://github.com/toblerity/fio-buffer
     $ cd fio-buffer
     $ python setup.py install
 
@@ -114,7 +114,7 @@ Developing
 
 .. code-block:: console
 
-    $ git clone https://github.com/geowurster/fio-buffer
+    $ git clone https://github.com/toblerity/fio-buffer
     $ cd fio-buffer
     $ virtualenv venv
     $ source venv/bin/activate
