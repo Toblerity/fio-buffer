@@ -6,11 +6,11 @@ A Fiona CLI plugin for buffering geometries.
 __version__ = '0.1.1'
 __author__ = 'Kevin Wurster'
 __email__ = 'wursterk@gmail.com'
-__source__ = 'https://github.com/geowurster/fio-buffer'
+__source__ = 'https://github.com/toblerity/fio-buffer'
 __license__ = '''
 New BSD License
 
-Copyright (c) 2015, Kevin D. Wurster
+Copyright (c) 2015-2016, Kevin D. Wurster
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -23,7 +23,7 @@ modification, are permitted provided that the following conditions are met:
   this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
 
-* The names of fio-buffer or its contributors may not be used to endorse or
+* The names of fio-buffer nor its contributors may not be used to endorse or
   promote products derived from this software without specific prior written
   permission.
 
